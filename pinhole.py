@@ -242,7 +242,7 @@ def Solve(ds,dhp,r,dpp,dea,dwe,tel,nel,nie,nair,dpl,xel,yel,DetPos,ShowPlot=Fals
             distance,normvec = ray.findinterspher(NewRay,DummySL1)  
             # Plot the ray from origin to the destination.
             if distance != 0:
-                ray.plotvector(NewRay,distance,color)        
+                ray.plot_vector(NewRay,distance,color)        
                 # Storing ray to the rays vector by their source of origin.
                 if origin == Point1:
                     rays1.append(NewRay)
@@ -253,7 +253,7 @@ def Solve(ds,dhp,r,dpp,dea,dwe,tel,nel,nie,nair,dpl,xel,yel,DetPos,ShowPlot=Fals
                 # The ray travels inside the eye ball.
                 distance,normvec = ray.findinterspher(RefractRay,DummySL1)
                 # Plot the refracting ray.
-                ray.plotvector(RefractRay,distance,color)
+                ray.plot_vector(RefractRay,distance,color)
                 # Refracting to outside of the eye.
                 RefractOutsideRay = ray.snell(RefractRay,normvec,nel,nie)
                 # Shine rays to the retina.
@@ -261,7 +261,7 @@ def Solve(ds,dhp,r,dpp,dea,dwe,tel,nel,nie,nair,dpl,xel,yel,DetPos,ShowPlot=Fals
                 # Find the intersection of the refracted ray with the detector surface.
 #                distance,normvec = ray.findintersurface(RefractOutsideRay,(DetPos[0],DetPos[1],DetPos[2]))
 #                # Plot the refracting ray.
-                ray.plotvector(RefractOutsideRay,distance,color)
+                ray.plot_vector(RefractOutsideRay,distance,color)
     # Loop to find intersection of the plotted rays.
     InterPoints = []
     for RaySource1 in rays1:

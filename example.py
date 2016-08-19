@@ -43,27 +43,27 @@ def example_of_ray_tracing(n_air=1.0, n_sphere=1.5):
         # If the ray hits the first sphere
         if distance != 0:
             # Plotting ray before hitting sphere1
-            ray.plotvector(vector,distance,plot2d=plot2d)
+            ray.plot_vector(vector,distance,plot2d=plot2d)
             # Calculating refraction parameters            
             refractvector = ray.snell(vector,normvec,n_air,n_sphere)
-            #ray.plotvector(refractvector,20)
+            #ray.plot_vector(refractvector,20)
             #reflectvector     = ray.reflect(vector,normvec)
-            #ray.plotvector(reflectvector,distance)
+            #ray.plot_vector(reflectvector,distance)
     
         distance,normvec  = ray.findinterspher(refractvector,spherical)
         # If the ray hits the sphere again
         if distance != 0:
             # Plotting the ray inside sphere1
-            ray.plotvector(refractvector,distance,plot2d=plot2d)
+            ray.plot_vector(refractvector,distance,plot2d=plot2d)
             # Calculating refraction parameters
             refractvector2 = ray.snell(refractvector,normvec,n_sphere,n_air)
             ## Plotting the vector leaving sphere1
-            #ray.plotvector(refractvector2,20)
+            #ray.plot_vector(refractvector2,20)
 
         distance,normvec  = ray.findinterspher(refractvector2,spherical2)
         if distance != 0:
             # Plotting ray before hitting sphere1
-            ray.plotvector(refractvector2,distance,plot2d=plot2d)
+            ray.plot_vector(refractvector2,distance,plot2d=plot2d)
             # Calculating refraction parameters            
             refractvector3 = ray.snell(refractvector2,normvec,n_air,n_sphere)
             
@@ -72,11 +72,11 @@ def example_of_ray_tracing(n_air=1.0, n_sphere=1.5):
         # If the ray hits the sphere again
         if distance != 0:
             # Plotting the ray inside sphere1
-            ray.plotvector(refractvector3,distance,plot2d=plot2d)
+            ray.plot_vector(refractvector3,distance,plot2d=plot2d)
             # Calculating refraction parameters
             refractvector4 = ray.snell(refractvector3,normvec,n_sphere,n_air)
             ## Plotting the vector leaving sphere2
-            ray.plotvector(refractvector4,20,plot2d=plot2d)
+            ray.plot_vector(refractvector4,20,plot2d=plot2d)
 
     ray.showplot(filename='img/rays.png',plot2d=plot2d, LabelX='X',LabelY='Y')
     
@@ -113,56 +113,44 @@ def example_pw_ray_tracing(n_air=1.0, n_sphere=1.2):
     #for angle in np.linspace(100,105,30):
     for y_loc in np.linspace(-4,4,30):
         
-        vector            = ray.create_vec_euler((0,y_loc,0), (0,90,90))
-        distance,normvec  = ray.findinterspher(vector,spherical)      
-
-        #ray.plotvector(vector,50,plot2d=plot2d)
+        vector = ray.create_vec_euler((0,y_loc,0), (0,90,90))
+        distance, normvec = ray.find_sphere_inter(vector,spherical)      
 
         print distance
 
         # If the ray hits the first sphere
         if distance != 0:
             # Plotting ray before hitting sphere1
-            ray.plotvector(vector,distance,plot2d=plot2d)
+            ray.plot_vector(vector,distance,plot2d=plot2d)
             # Calculating refraction parameters            
             refractvector = ray.snell(vector,normvec,n_air,n_sphere)
-            #ray.plotvector(refractvector,20)
-            #reflectvector     = ray.reflect(vector,normvec)
-            #ray.plotvector(reflectvector,distance)
-
-
-            distance,normvec  = ray.findinterspher(refractvector,spherical)
+            distance,normvec  = ray.find_sphere_inter(refractvector,spherical)
+            
         # If the ray hits the sphere again
         if distance != 0:
             # Plotting the ray inside sphere1
-            ray.plotvector(refractvector,distance,plot2d=plot2d)
+            ray.plot_vector(refractvector,distance,plot2d=plot2d)
             # Calculating refraction parameters
             refractvector2 = ray.snell(refractvector,normvec,n_sphere,n_air)
-            ## Plotting the vector leaving sphere1
-            #ray.plotvector(refractvector2,20)
-
-            distance,normvec  = ray.findinterspher(refractvector2,spherical2)
+            distance,normvec  = ray.find_sphere_inter(refractvector2,spherical2)
             
         if distance != 0:
             # Plotting ray before hitting sphere1
-            ray.plotvector(refractvector2,distance,plot2d=plot2d)
+            ray.plot_vector(refractvector2,distance,plot2d=plot2d)
             # Calculating refraction parameters            
-            refractvector3 = ray.snell(refractvector2,normvec,n_air,n_sphere)
-            
-            distance,normvec  = ray.findinterspher(refractvector3,spherical2)
+            refractvector3 = ray.snell(refractvector2,normvec,n_air,n_sphere)          
+            distance,normvec  = ray.find_sphere_inter(refractvector3,spherical2)
 
         # If the ray hits the sphere again
         if distance != 0:
             # Plotting the ray inside sphere1
-            ray.plotvector(refractvector3,distance,plot2d=plot2d)
+            ray.plot_vector(refractvector3,distance,plot2d=plot2d)
             # Calculating refraction parameters
             refractvector4 = ray.snell(refractvector3,normvec,n_sphere,n_air)
             ## Plotting the vector leaving sphere2
-            ray.plotvector(refractvector4,20,plot2d=plot2d)
+            ray.plot_vector(refractvector4,20,plot2d=plot2d)
 
-
-
-    ray.showplot(filename='rays.png',plot2d=plot2d)
+    ray.showplot(filename='img/rays.png',plot2d=plot2d)
     return True
 
 def example_of_ray_tracing_2():
@@ -176,10 +164,10 @@ def example_of_ray_tracing_2():
     vector            = ray.create_vec_euler((0,0.5,5),(90,90,0))
     distance,normvec  = ray.findintersurface(vector,(point0,point1,point2))
     if ray.isitontriangle(normvec[0],point0,point1,point2) == True:
-        ray.plotvector(normvec,distance,'r')
-        ray.plotvector(vector,distance,'g')
+        ray.plot_vector(normvec,distance,'r')
+        ray.plot_vector(vector,distance,'g')
         reflectvector     = ray.reflect(vector,normvec)
-        ray.plotvector(reflectvector,distance,'b')
+        ray.plot_vector(reflectvector,distance,'b')
     ray.defineplotshape((-20,20),(-20,20),(-20,20))
     ray.showplot()
     return True
@@ -205,7 +193,7 @@ def example_of_ray_tracing_3():
             rayslist.append(vectors)
             for rays in rayslist:
                 if len(rayslist) > 3:
-                    ray.plotvector(rays,10)
+                    ray.plot_vector(rays,10)
                     break
 
                 for points in cubes:
@@ -215,8 +203,8 @@ def example_of_ray_tracing_3():
                     if ray.isitontriangle(normvec[0],points[0], \
                                           points[1],points[2]) == True:
                         
-                        ray.plotvector(normvec,pitch/10,'r')
-                        ray.plotvector(rays,distance)
+                        ray.plot_vector(normvec,pitch/10,'r')
+                        ray.plot_vector(rays,distance)
                         reflectvector = ray.reflect(rays,normvec)
                         rayslist.append(reflectvector)
                         

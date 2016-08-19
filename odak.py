@@ -268,6 +268,7 @@ class raytracing():
                    vector1[0][1]-vector2[0][1],
                    vector1[0][2]-vector2[0][2]
                   ])
+
         # LU decomposition solution.
         distances = scipy.linalg.solve(A[:][0:2], B[:][0:2])
         # Check if the given solution matches the initial condition
@@ -286,16 +287,26 @@ class raytracing():
         return Point,distances
 
     def create_vec(self,(x0,y0,z0),(x1,y1,z1)):
-        # Create a vector from two given points.
+        '''
+        Create a vector from two given points.
+
+        Returns
+        -------
+
+        vec_array : A numpy array representing the vector
+        pdist : The distance between the two points
+
+        '''
+        
         point = array([[x0],[y0],[z0]])
         # Distance between two points.
-        s     = sqrt( pow((x0-x1),2) + pow((y0-y1),2) + pow((z0-z1),2) )
+        pdist = sqrt( pow((x0-x1),2) + pow((y0-y1),2) + pow((z0-z1),2) )
 
-        if s != 0:
-            alpha = (x1-x0)/s
-            beta  = (y1-y0)/s
-            gamma = (z1-z0)/s
-        elif s == 0:
+        if pdist != 0:
+            alpha = (x1-x0)/pdist
+            beta  = (y1-y0)/pdist
+            gamma = (z1-z0)/pdist
+        elif pdist == 0:
             alpha = float('nan')
             beta  = float('nan')
             gamma = float('nan')
@@ -304,9 +315,11 @@ class raytracing():
         cosin = array([[alpha],[beta],[gamma]])
         # returns vector and the distance.
 
-        return array([point,cosin]),s
+        vec_array = array([point,cosin])
+        
+        return vec_array, pdist
 
-    def multiplytwovectors(self,vector1,vector2):
+    def cross_vectors(self,vector1,vector2):
         # Multiply two vectors and return the resultant vector.
         # Used method described under:
         # Cross-product: http://en.wikipedia.org/wiki/Cross_product
@@ -314,7 +327,7 @@ class raytracing():
 
         return array([vector1[0],[[angle[0]],[angle[1]],[angle[2]]]])
 
-    def anglebetweentwovector(self,vector0,vector1):
+    def angle_btw_vectors(self,vector0,vector1):
         # Finds angle between two vectors
         # Used method described under:
         # http://www.wikihow.com/Find-the-Angle-Between-Two-Vectors
@@ -367,50 +380,51 @@ class raytracing():
         output = dot(R,input-array([[x0],[y0],[z0]]))
         return output
 
-    def reflect(self,vector,normvector):
+    def reflect(self,vec,nvec):
         # Used method described in G.H. Spencer and M.V.R.K. Murty,
         # "General Ray-Tracing Procedure", 1961
-        mu          = 1
-        div         = pow(normvector[1,0],2)  + pow(normvector[1,1],2) + \
-                      pow(normvector[1,2],2)
+        mu = 1
+        div = pow(nvec[1,0],2)  + pow(nvec[1,1],2) + \
+                      pow(nvec[1,2],2)
 
-        a           = mu* ( vector[1,0]*normvector[1,0]
-                          + vector[1,1]*normvector[1,1]
-                          + vector[1,2]*normvector[1,2]) / div
-        outvec      = vector.copy()
-        outvec[0,0] = normvector[0,0]
-        outvec[0,1] = normvector[0,1]
-        outvec[0,2] = normvector[0,2]
-        outvec[1,0] = vector[1,0] - 2*a*normvector[1,0]
-        outvec[1,1] = vector[1,1] - 2*a*normvector[1,1]
-        outvec[1,2] = vector[1,2] - 2*a*normvector[1,2]
+        a = mu* ( vec[1,0]*nvec[1,0] + vec[1,1]*nvec[1,1] + \
+                  vec[1,2]*nvec[1,2]) / div
+
+        outvec = vec.copy()
+        outvec[0,0] = nvec[0,0]
+        outvec[0,1] = nvec[0,1]
+        outvec[0,2] = nvec[0,2]
+        outvec[1,0] = vec[1,0] - 2*a*nvec[1,0]
+        outvec[1,1] = vec[1,1] - 2*a*nvec[1,1]
+        outvec[1,2] = vec[1,2] - 2*a*nvec[1,2]
 
         return outvec
 
     def FindReflectNormal(self,vector0,vector1):
         # Definition to find reflection normal in between two given vectors.
         mu = 1
-        NormVector      = vector1.copy()
+        nvec = vector1.copy()
         for k in xrange(1,3):
-            a0              = arccos(vector0[1,k])
-            a1              = arccos(vector1[1,k])
-            NormVector[1,k] = cos(a1+(pi-(a0+a1))/2.)
+            a0 = arccos(vector0[1,k])
+            a1 = arccos(vector1[1,k])
+            nvec[1,k] = cos(a1+(pi-(a0+a1))/2.)
 
-            return NormVector
+        return nvec
 
-    def snell(self,vector,normvector,n1,n2,error=0.01):
+    def snell(self,vec,nvec,n1,n2,error=0.01):
         # Method for Snell's law
         # n1 refractive index of the medium which vector is coming from
         # n2 refractive index of the medium which vector tries to go into
-        mu    = n1/n2
-        div   = pow(normvector[1,0],2)  + pow(normvector[1,1],2) + \
-                pow(normvector[1,2],2)
-        a     = mu* (vector[1,0]*normvector[1,0] + vector[1,1]*normvector[1,1] \
-                     + vector[1,2]*normvector[1,2]) / div
-        b     = (pow(mu,2)-1) / div
-        to    = -b*0.5/a
-        num   = 0
-        eps   = error*2
+        mu = n1/n2
+        div = pow(nvec[1,0],2)  + pow(nvec[1,1],2) + \
+                pow(nvec[1,2],2)
+        a = mu* (vec[1,0]*nvec[1,0] + vec[1,1]*nvec[1,1] \
+                     + vec[1,2]*nvec[1,2]) / div
+        
+        b = (pow(mu,2)-1) / div
+        to = -b*0.5/a
+        num = 0
+        eps = error*2
 
         # Newton-Raphson method to find the correct root
         while eps > error:
@@ -424,16 +438,17 @@ class raytracing():
            #print 'Iteration number: %s, Error: %s' % (num,error)
            # Iteration limiter
            if num > 5000:
-              return vector
-        VectorOutput      = vector.copy()
-        VectorOutput[0,0] = normvector[0,0]
-        VectorOutput[0,1] = normvector[0,1]
-        VectorOutput[0,2] = normvector[0,2]
-        VectorOutput[1,0] = mu*vector[1,0] + to*normvector[1,0]
-        VectorOutput[1,1] = mu*vector[1,1] + to*normvector[1,1]
-        VectorOutput[1,2] = mu*vector[1,2] + to*normvector[1,2]
+              return vec
 
-        return VectorOutput
+        vec_out      = vec.copy()
+        vec_out[0,0] = nvec[0,0]
+        vec_out[0,1] = nvec[0,1]
+        vec_out[0,2] = nvec[0,2]
+        vec_out[1,0] = mu*vec[1,0] + to*nvec[1,0]
+        vec_out[1,1] = mu*vec[1,1] + to*nvec[1,1]
+        vec_out[1,2] = mu*vec[1,2] + to*nvec[1,2]
+
+        return vec_out
 
     def FuncQuad(self,k,l,m,quad):
         # Definition to return a 3D point position in quadratic
@@ -441,12 +456,12 @@ class raytracing():
         return pow((k-quad[0])/quad[4],2) + pow((l-quad[1])/quad[5],2) + \
             pow((m-quad[2])/quad[6],2) - pow(quad[3],2)
 
-    def FuncSpher(self,k,l,m,sphere):
+    def sphere(self,k,l,m,sphere):
         # Definition to return a 3D point position in spherical definition.
         return pow(k-sphere[0],2) + pow(l-sphere[1],2) + \
             pow(m-sphere[2],2) - pow(sphere[3],2)
 
-    def FuncNormSpher(self,x0,y0,z0,sphere):
+    def norm_sphere(self,x0,y0,z0,sphere):
         # Definition to return normal of a sphere.
         # Derivatives.
         gradx = 2*(x0-sphere[0])/sphere[3]**2
@@ -482,11 +497,11 @@ class raytracing():
                                   self.FuncNormQuad,error=error,
                                   numiter=numiter,iternotify=iternotify)
 
-    def findinterspher(self,vector,sphere,error=0.00000001,numiter=1000,
+    def find_sphere_inter(self,vector,sphere,error=0.00000001,numiter=1000,
                        iternotify='no'):
         # Finds the intersection of a ray with a sphere.
         return self.FindInterFunc(
-            vector,sphere,self.FuncSpher, self.FuncNormSpher,error=error,
+            vector,sphere, self.sphere, self.norm_sphere,error=error,
             numiter=numiter,iternotify=iternotify)
 
     def FindInterFunc(self,vector,SurfParam,Func,FuncNorm,
@@ -535,7 +550,7 @@ class raytracing():
         vector0,s     = self.create_vec(point0,point1)
         vector1,s     = self.create_vec(point1,point2)
         vector2,s     = self.create_vec(point0,point2)
-        normvec       = self.multiplytwovectors(vector0,vector2)
+        normvec       = self.cross_vectors(vector0,vector2)
         f             = point0-vector[0].T
         n             = normvec[1].copy()
         distance      = dot(n.T,f.T)/dot(n.T,vector[1])
@@ -545,8 +560,10 @@ class raytracing():
 
         return distance[0][0],normvec
 
-    def plotvector(self,vector,distance,color='k',plot2d=False,lw=2):
-        # Method to plot rays
+    def plot_vector(self,vector,distance,color='k',plot2d=False,lw=2):
+        '''
+        Method to plot rays
+        '''
         
         x = array([vector[0,0,0], distance * vector[1,0] + vector[0,0,0]])
         y = array([vector[0,1,0], distance * vector[1,1] + vector[0,1,0]])
@@ -726,7 +743,9 @@ class raytracing():
 
     def PlotCircle(self,center,r,c='none'):
         # Method to plot circle.
-        circle = Circle((center[0], center[1]), r, facecolor=c, edgecolor=(0,0,0), linewidth=4, alpha=1)
+        circle = Circle((center[0], center[1]), r, facecolor=c,
+                        edgecolor=(0,0,0), linewidth=4, alpha=1)
+        
         self.ax.add_patch(circle)
         art3d.pathpatch_2d_to_3d(circle, z=center[2], zdir='z')
         return array([center,r])
