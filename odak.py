@@ -1,7 +1,8 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+# This is a fork of the odak library, orginal: https://github.com/kunguz/odak
+# This particular fork can be found here: https://github.com/jegudmunds/odak
 
-# Whole library can be found under https://github.com/kunguz/odak.
 import sys,matplotlib,scipy
 #matplotlib.use('Agg')
 import matplotlib.pyplot
@@ -48,7 +49,8 @@ class ParaxialMatrix():
         return vector
 
     def CurvedInterface(self,vector,n1,n2,R,deltax=0,deltafi=0):
-        # Ray transfer matrix of a curved interface, focal length is f and is in in milimeters.
+        # Ray transfer matrix of a curved interface,
+        # focal length is f and is in in milimeters.
         # Taken from Wikipedia article: Ray transfer matrix anaylsis.
         # deltax is the spatial shift, deltafi is the angular shift.
         # n1 is the first medium that the ray is coming from.
@@ -57,10 +59,12 @@ class ParaxialMatrix():
         CInter = array([[1,0,deltax],[(n1-n2)/R/n2,n1/n2,deltafi],[0,0,1]])
         vector = dot(CInter,vector)
         return vector
+
     def PlotVector(self,startvector,stopvector,posx=0,distance=0,color='g+-'):
         if stopvector[1] !=0:
             # Method to plot paraxial vectors in 2D space.
-            self.plt.plot([posx,(stopvector[0]-startvector[0])/stopvector[1]+posx],[startvector[0],stopvector[0]],color)
+            self.plt.plot([posx,(stopvector[0]-startvector[0])\
+                           /stopvector[1]+posx],[startvector[0],stopvector[0]],color)
             # Return new position at X-axis.
             posx += (stopvector[0]-startvector[0])/stopvector[1]
         else:
@@ -70,34 +74,48 @@ class ParaxialMatrix():
     def PlotLine(self,point1,point2,color='ro--'):
         # Definition to plot a line in between two points.
         self.plt.plot(point1,point2,color)
+
         return True
+
     def PlotLens(self,CenterXY, thickness, LensHeight, rotation, alpha=0.5):
         # Definition to plot a lens.
-        lens = Ellipse(xy=CenterXY, width=thickness, height=LensHeight, angle=-rotation)
+        lens = Ellipse(xy=CenterXY, width=thickness,
+                       height=LensHeight, angle=-rotation)
+        
         self.ax.add_artist(lens)
         lens.set_clip_box(self.ax.bbox)
         lens.set_alpha(alpha)
+        
         return True
+    
     def InitNewPlot(self):
         # New plot initiated.
         NewFig  = self.plt.figure()
         NewPlot = NewFig.add_subplot(111)
         return NewPlot,NewFig
+
     def PlotHist(self,dataset,plot):
         # Definition to plot a histogram.
         plot.hist(dataset,bins=1000,color='blue',normed='True')
+
         return True
+
     def PlotData(self,dataset,color,alpha=1,linestyle='-'):
         # Definition to plot a dataset.
-        self.plt.plot(dataset[0],dataset[1],linestyle=linestyle,color=color,alpha=alpha)
+        self.plt.plot(dataset[0],dataset[1],linestyle=linestyle,
+                      color=color,alpha=alpha)
         return True
+    
     def PlotFillData(self,dataset,color):
         # Definition to plot a dataset with fill.
         self.plt.fill(dataset[0],dataset[1],color,alpha=0.3)
+        
         return True
+    
     def ShowPlot(self):
         # Definition to plot the result.
         self.plt.show()
+        
         return True
 
 ####################################################################
@@ -147,6 +165,7 @@ class raytracing():
 
     def DegreesToRadians(self,angle):
         # Function to convert degrees to radians.
+
         return radians(angle)
 
     def findangles(self,Point1,Point2):
@@ -163,6 +182,7 @@ class raytracing():
         # Z axis rotation is calculated.
         angles.append(degrees(arccos( (Point2[2]-Point1[2])/distance )))
         # Angles are returned.
+
         return angles
 
     def GenerateBSpline(self, cv, n=100, degree=3, periodic=False):
@@ -206,6 +226,7 @@ class raytracing():
     def finddistancebetweentwopoints(self,Point1,Point2):
         # Function to find the distance between two points if there
         # was a line intersecting at both of them.
+
         return sqrt(sum((array(Point1)-array(Point2))**2))
 
     def createvector(self,(x0,y0,z0),(alpha,beta,gamma)):
@@ -793,36 +814,52 @@ class raytracing():
 
 ####################################################################
 class jonescalculus():
+
     def __init__(self):
         return
+    
     def linearpolarizer(self,input,rotation=0):
         # Linear polarizer, rotation is in degrees and it is counter clockwise
         rotation        = radians(rotation)
-        rotmat          = array([[cos(rotation),sin(rotation)],[-sin(rotation),cos(rotation)]])
+        rotmat          = array([[cos(rotation),sin(rotation)],
+                                 [-sin(rotation),cos(rotation)]])
+        
         linearpolarizer = array([[1,0],[0,0]])
         linearpolarizer = dot(rotmat.transpose(),dot(linearpolarizer,rotmat))
+
         return dot(linearpolarizer,input)
+    
     def circullarpolarizer(self,input,type='lefthanded'):
         # Circullar polarizer
         if type == 'lefthanded':
             circullarpolarizer = array([[0.5,-0.5j],[0.5j,0.5]])
         if type == 'righthanded':
             circullarpolarizer = array([[0.5,0.5j],[-0.5j,0.5]])
+            
         return dot(circullarpolarizer,input)
+    
     def quarterwaveplate(self,input,rotation=0):
         # Quarter wave plate, type determines the placing of the fast axis
         rotation = radians(rotation)
-        rotmat   = array([[cos(rotation),sin(rotation)],[-sin(rotation),cos(rotation)]])
+        rotmat   = array([[cos(rotation),sin(rotation)],
+                          [-sin(rotation),cos(rotation)]])
+        
         qwp = array([[1,0],[0,-1j]])
         qwp = dot(rotmat.transpose(),dot(qwp,rotmat))
+
         return dot(qwp,input)
+    
     def halfwaveplate(self,input,rotation=0):
         # Half wave plate
         rotation = radians(rotation)
-        rotmat   = array([[cos(rotation),sin(rotation)],[-sin(rotation),cos(rotation)]])
+        rotmat   = array([[cos(rotation),sin(rotation)],
+                          [-sin(rotation),cos(rotation)]])
+        
         hwp      = array([[1,0],[0,-1]])
         hwp      = dot(rotmat.transpose(),dot(hwp,rotmat))
+        
         return dot(hwp,input)
+
     def waveplate(self,input,retardation=0,rotation=0):
         # Waveplate with a given retardation angle.
         rotation    = radians(rotation)
@@ -839,6 +876,7 @@ class jonescalculus():
         bfp      = array([[1,0],[0,exp(-1j*delta)]])
         bfp      = dot(rotmat.transpose(),dot(bfp,rotmat))
         return dot(bfp,input)
+
     def LCD(self,input,alpha,ne,n0,d,wavelength,rotation=0):
         # THIS DEFINITION IS DEFECTED, DO NOT USE IT!
         # Nematic liquid crystal, d cell thickness, extraordinary refrative index ne, ordinary refractive index n0,
@@ -854,16 +892,24 @@ class jonescalculus():
         print gamma, N
         lrot     = array([[cos(alpha*d),-sin(alpha*d)],[sin(alpha*d),cos(alpha*d)]])
         lretard  = array([[exp(-1j*gamma/2/N),0],[0,exp(1j*gamma/2/N)]])
-#        llcd     =
+        #llcd     =
         lc       = dot(lrot,lcd)
         lc       = dot(rotmat.transpose(),dot(lc,rotmat))
+        
         return dot(lc,input)
-    def ferroliquidcrystal(self,input,tetat,ne,n0,d,wavelength,fieldsign='+',rotation=0):
-        # Ferroelectric liquid crystal, d cell thickness, extraordinary refrative index ne, ordinary refractive index n0
-        # Applied field sign determines the rotation angle
+    
+    def ferroliquidcrystal(self,input,tetat,ne,n0,d,
+                           wavelength,fieldsign='+',rotation=0):
+        
+        # Ferroelectric liquid crystal, d cell thickness,
+        # extraordinary refrative index ne, ordinary refractive index
+        # n0 Applied field sign determines the rotation angle
+        
         rotation = radians(rotation)
         tetat    = radians(tetat)
-        rotmat   = array([[cos(rotation),sin(rotation)],[-sin(rotation),cos(rotation)]])
+        rotmat   = array([[cos(rotation),sin(rotation)],
+                          [-sin(rotation),cos(rotation)]])
+        
         beta     = 2*pi*(ne-n0)/wavelength
         lrot1    = array([[cos(tetat),-sin(tetat)],[sin(tetat),cos(tetat)]])
         lrot2    = array([[cos(tetat),sin(tetat)],[-sin(tetat),cos(tetat)]])
@@ -873,15 +919,15 @@ class jonescalculus():
         elif fieldsign == '-':
             lc = dot(dot(lrot2,lretard),lrot1)
         lc       = dot(rotmat.transpose(),dot(lc,rotmat))
+        
         return dot(lc,input)
+    
     def electricfield(self,a1,a2):
         # Electric field vector is defined here.
         # a1 is the electic field intensity at x-axis.
         # a2 is the electric field intensity at y-axis.
+
         return array([[a1],[a2]])
-
-
-
 
 ####################################################################
 class aperture():
@@ -897,7 +943,9 @@ class aperture():
             for j in range(int(ny/2+delta/2-Y/2),int(ny/2+delta/2+Y/2)):
                 obj[ny/2-abs(ny/2-j),i] = 1
                 obj[j,i] = 1
+
         return obj
+    
 
     def rectangle(self,nx,ny,side):
         # Creates a matrix that contains rectangle
@@ -905,6 +953,7 @@ class aperture():
         for i in range(int(nx/2-side/2),int(nx/2+side/2)):
             for j in range(int(ny/2-side/2),int(ny/2+side/2)):
                 obj[j,i] = 1
+                
         return obj
 
     def circle(self,nx,ny,radius):
@@ -914,6 +963,7 @@ class aperture():
             for j in range(int(ny/2-radius/2),int(ny/2+radius/2)):
                 if (abs(i-nx/2)**2+abs(j-ny/2)**2)**(0.5)< radius/2:
                     obj[j,i] = 1
+                    
         return obj
 
     def sinamgrating(self,nx,ny,grating):
@@ -922,6 +972,7 @@ class aperture():
         for i in xrange(nx):
             for j in xrange(ny):
                 obj[i,j] = 0.5+0.5*cos(2*pi*j/grating)
+                
         return obj
 
     def lens(self,nx,ny,focal,wavelength,pixeltom):
@@ -933,6 +984,7 @@ class aperture():
         X,Y    = meshgrid(x,y)
         Z      = X**2+Y**2
         obj    = exp(-1j*k*0.5/focal*Z)
+        
         return obj
 
     def gaussian(self,nx,ny,sigma):
@@ -958,7 +1010,9 @@ class aperture():
         for i in xrange(int(pitch)):
             for j in xrange(int(pitch/2)):
                 if j != 0:
-                    if float(j)/(int(pitch)-i) < 0.5 and (int(sqrt(3)*pitch/6)-i)/float(j) < 1./sqrt(3):
+                    if float(j)/(int(pitch)-i) < 0.5 and \
+                       (int(sqrt(3)*pitch/6)-i)/float(j) < 1./sqrt(3):
+                        
                         # Distance to plane determines the level of the amplitude
                         # Plane as a line y = slope*x+ pitch
                         # Perpendicula line  y = -(1/slope)*x+n
@@ -966,7 +1020,9 @@ class aperture():
                         n         = j + (1/slope) * (i)
                         x1        = (n - pitch/2)/(slope+1/slope)
                         y1        = -(1/slope)*x1+n
-                        part[i,j] = int(sqrt(3)*pitch/6) - sqrt( pow(i-x1,2) + pow(j-y1,2) )
+                        part[i,j] = int(sqrt(3)*pitch/6) - \
+                                    sqrt( pow(i-x1,2) + pow(j-y1,2) )
+                        
                         part[pitch-i-1,int(pitch/2)-j-1] = part[i,j]
                 else:
                     if i > int(sqrt(3)*pitch/6):
@@ -974,7 +1030,9 @@ class aperture():
                         n         = j + (1/slope) * (i)
                         x1        = (n - pitch/2)/(slope+1/slope)
                         y1        = -(1/slope)*x1+n
-                        part[i,j] = int(sqrt(3)*pitch/6) - sqrt( pow(i-x1,2) + pow(j-y1,2) )
+                        part[i,j] = int(sqrt(3)*pitch/6) - \
+                                    sqrt( pow(i-x1,2) + pow(j-y1,2) )
+                        
                         part[pitch-i-1,int(pitch/2)-j-1] = part[i,j]
         left  = part
         right = part[::-1]
@@ -982,10 +1040,13 @@ class aperture():
         obj   = tile(part,(nx/pitch,ny/pitch))
 
         for i in xrange(nx/pitch/2):
-           obj[(2*i+1)*pitch:(2*i+1)*pitch+pitch,:] = roll(obj[(2*i+1)*pitch:(2*i+1)*pitch+pitch,:],pitch/2)
+           obj[(2*i+1)*pitch:(2*i+1)*pitch+pitch,:] = roll(
+               obj[(2*i+1)*pitch:(2*i+1)*pitch+pitch,:],pitch/2)
+           
         k     = 2*pi/wavelength
         D     = 5
         obj   = pow(obj,3)*exp(1j*k*obj)
+        
         return obj
 
     def show(self,obj,pixeltom,wavelength,title='Detector',
@@ -1005,6 +1066,7 @@ class aperture():
         self.plt.ylabel(ylabel)
         if filename != None:
             self.plt.savefig(filename)
+            
         return True
 
     def show3d(self,obj,filename=None):
@@ -1029,14 +1091,19 @@ class aperture():
         self.plt.plot(arange(-nx/2,nx/2)*pixeltom,abs(obj[nx/2,:]))
         if filename != None:
             self.plt.savefig(filename)
+
         return True
+    
     def showplots(self):
         # Definition to show the plots.
         self.plt.show()
+        
         return True
+    
     def ClosePlot(self):
         # Definition to kill a figure.
         self.plt.close("all")
+        
         return True
 
 ####################################################################

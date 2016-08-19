@@ -1,5 +1,8 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+# This is a fork of the odak library, orginal: https://github.com/kunguz/odak
+# This particular fork can be found here: https://github.com/jegudmunds/odak
+
 
 import sys,odak,math
 import numpy as np
@@ -75,7 +78,7 @@ def example_of_ray_tracing(n_air=1.0, n_sphere=1.5):
             ## Plotting the vector leaving sphere2
             ray.plotvector(refractvector4,20,plot2d=plot2d)
 
-    ray.showplot(filename='rays.png',plot2d=plot2d, LabelX='X',LabelY='Y')
+    ray.showplot(filename='img/rays.png',plot2d=plot2d, LabelX='X',LabelY='Y')
     
     return True
 
