@@ -78,15 +78,13 @@ class raytracing():
         self.ax.zaxis.label.set_fontweight(weight)
         return True
 
-    def DegreesToRadians(self,angle):
-        # Function to convert degrees to radians.
-
-        return radians(angle)
-
     def findangles(self,Point1,Point2):
-        # Function to find angle between two points if there was a
-        # line intersecting at both of them.
-        # Vector to hold angles is created.
+        '''
+        Function to find angle between two points if there was a
+        line intersecting at both of them.
+        Vector to hold angles is created.
+
+        '''
         angles   = []
         # Find the distance in between points.
         distance = self.dist(Point1,Point2)
@@ -156,37 +154,6 @@ class raytracing():
 
         return array([point.reshape(3,1),cosin.reshape(3,1)])
 
-    def CalculateIntersectionOfTwoVectors(self,vec1,vec2):
-        # Method to calculate the intersection of two vectors.
-        A = array([
-                   [vec1[1][0][0], vec2[1][0][0] ],
-                   [vec1[1][1][0], vec2[1][1][0] ],
-                   [vec1[1][2][0], vec2[1][2][0] ]
-                  ])
-        
-        B = array(
-                  [vec1[0][0]-vec2[0][0],
-                   vec1[0][1]-vec2[0][1],
-                   vec1[0][2]-vec2[0][2]
-                  ])
-
-        # LU decomposition solution.
-        distances = scipy.linalg.solve(A[:][0:2], B[:][0:2])
-        # Check if the given solution matches the initial condition
-        # at the third equation.
-
-        if int(abs(dot(A[:][2],distances))) != int(abs(B[:][2])):
-           distances[0] = 0
-           distances[1] = 0
-
-        # Point vector created.
-        Point = array([vec1[0][0][0]-distances[0]*vec1[1][0][0],
-                       vec1[0][1][0]-distances[0]*vec1[1][1][0],
-                       vec1[0][2][0]-distances[0]*vec1[1][2][0]
-                      ])
-
-        return Point,distances
-
     def create_vec(self,(x0,y0,z0),(x1,y1,z1)):
         '''
         Create a vector from two given points.
@@ -220,6 +187,40 @@ class raytracing():
         
         return vec_array, pdist
 
+    def vec_intersect(self,vec1,vec2):
+        '''
+        Method to calculate the intersection of two vectors.
+        '''
+
+        A = array([
+                   [vec1[1][0][0], vec2[1][0][0] ],
+                   [vec1[1][1][0], vec2[1][1][0] ],
+                   [vec1[1][2][0], vec2[1][2][0] ]
+                  ])
+        
+        B = array(
+                  [vec1[0][0]-vec2[0][0],
+                   vec1[0][1]-vec2[0][1],
+                   vec1[0][2]-vec2[0][2]
+                  ])
+
+        # LU decomposition solution.
+        distances = scipy.linalg.solve(A[:][0:2], B[:][0:2])
+        # Check if the given solution matches the initial condition
+        # at the third equation.
+
+        if int(abs(dot(A[:][2],distances))) != int(abs(B[:][2])):
+           distances[0] = 0
+           distances[1] = 0
+
+        # Point vector created.
+        Point = array([vec1[0][0][0]-distances[0]*vec1[1][0][0],
+                       vec1[0][1][0]-distances[0]*vec1[1][1][0],
+                       vec1[0][2][0]-distances[0]*vec1[1][2][0]
+                      ])
+
+        return Point, distances
+
     def cross_vectors(self,vec1,vec2):
         # Multiply two vectors and return the resultant vector.
         # Used method described under:
@@ -240,37 +241,51 @@ class raytracing():
 
         return angle
 
-    def SameSide(self,p1,p2,a,b):
+    def same_side(self,p1,p2,a,b):
+        '''
         # Methodology taken from http://www.blackpawn.com/texts/pointinpoly/
+        '''
         ba    = subtract(b,a)
         p1a   = subtract(p1,a)
         p2a   = subtract(p2,a)
         cp1   = cross(ba,p1a)
         cp2   = cross(ba,p2a)
+
         if dot(cp1,cp2) >= 0:
             return True
 
         return False
 
     def isitontriangle(self,pointtocheck,point0,point1,point2,error=0.001):
-        # Check if the given point is insight the triangle which represented.
-        # point0, point1 and point2 are the corners of the triangle.
+        '''
+        Check if the given point is insight the triangle which represented.
+        point0, point1 and point2 are the corners of the triangle.
+        '''
+
         pointtocheck = pointtocheck.reshape(3)
-        side0        = self.SameSide(pointtocheck,point0,point1,point2)
-        side1        = self.SameSide(pointtocheck,point1,point0,point2)
-        side2        = self.SameSide(pointtocheck,point2,point0,point1)
+        side0        = self.same_side(pointtocheck,point0,point1,point2)
+        side1        = self.same_side(pointtocheck,point1,point0,point2)
+        side2        = self.same_side(pointtocheck,point2,point0,point1)
         if side0 == True and side1 == True and side2 == True:
             return True
 
         return False
 
     def transform(self,input,(alpha,beta,gamma),(x0,y0,z0)):
-        # alpha; rotation angle (euler) of x axis.
-        # beta; rotation angle (euler) of y axis.
-        # gamma; rotation angle (euler) of z axis.
-        # x0; x coordinate of origin measured in the reference system.
-        # y0; y coordinate of origin measured in the reference system.
-        # z0; z coordinate of origin measured in the reference system.
+        '''
+
+        Arguments
+        ---------
+        alpha; rotation angle (euler) of x axis.
+        beta; rotation angle (euler) of y axis.
+        gamma; rotation angle (euler) of z axis.
+        x0; x coordinate of origin measured in the reference system.
+        y0; y coordinate of origin measured in the reference system.
+        z0; z coordinate of origin measured in the reference system.
+
+        Return
+        ------
+        '''
         alpha  = radians(alpha)
         beta   = radians(beta)
         gamma  = radians(gamma)
@@ -278,7 +293,9 @@ class raytracing():
         R2     = array([[1,0,0],[0,cos(beta),-sin(beta)],[0,sin(beta),cos(beta)]])
         R3     = array([[cos(alpha),0,-sin(alpha)],[0,1,0],[sin(alpha),0,cos(alpha)]])
         R      = dot(dot(R1,R2),R3)
+
         output = dot(R,input-array([[x0],[y0],[z0]]))
+
         return output
 
     def reflect(self,vec,nvec):
@@ -306,7 +323,7 @@ class raytracing():
 
         return outvec
 
-    def FindReflectNormal(self,vec0,vec1):
+    def reflect_normal(self,vec0,vec1):
         '''
         Definition to find reflection normal in between two given vectors.
         '''

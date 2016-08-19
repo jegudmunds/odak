@@ -190,7 +190,7 @@ def Solve(ds,dhp,r,dpp,dea,dwe,tel,nel,nie,nair,dpl,xel,yel,DetPos,ShowPlot=Fals
     # Add additional points on the exterior of the pinholes.
     for k in xrange(0,360,60):
         # Converting degrees to radians.
-        k = ray.DegreesToRadians(k)
+        k = radians(k)
         # Appending new item to the point lists.
         PointList1.append((HoleCenter1[0]+Radius1*cos(k),HoleCenter1[1]+Radius1*sin(k),HoleCenter1[2]))
         PointList2.append((HoleCenter2[0]+Radius2*cos(k),HoleCenter2[1]+Radius2*sin(k),HoleCenter2[2]))
@@ -267,7 +267,7 @@ def Solve(ds,dhp,r,dpp,dea,dwe,tel,nel,nie,nair,dpl,xel,yel,DetPos,ShowPlot=Fals
     for RaySource1 in rays1:
         for RaySource2 in rays2:
             # Find the intersection of two rays.
-            intersection, distances = ray.CalculateIntersectionOfTwoVectors(RaySource1,RaySource2)
+            intersection, distances = ray.vec_intersect(RaySource1,RaySource2)
             # Check if the calculated distance value has a logical value.
             CheckValue = "%.2f" % abs(distances[0])
             if CheckValue != '0.00' and float(CheckValue) < 100000:
