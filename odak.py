@@ -20,6 +20,7 @@ from math import radians,tan,pi
 __author__  = ('Kaan Akşit')
 
 class ParaxialMatrix():
+
     def __init__(self):
         # See "Laser beams and resonators" from Kogelnik and Li for
         # the theoratical explanation
@@ -120,14 +121,24 @@ class ParaxialMatrix():
 
 ####################################################################
 class raytracing():
+    '''
+    Class for performing simple ray tracing calculuations and visualizations
+
+    See "General Ray tracing procedure" from
+    G.H. Spencerand M.V.R.K Murty for the theoratical explanation
+
+    '''
 
     def __init__(self):
-        # See "General Ray tracing procedure" from
-        # G.H. Spencerand M.V.R.K Murty for the theoratical explanation
+        '''
+        '''
         seterr(divide='ignore', invalid='ignore')
         pass
 
     def PlotInit(self,plot2d=False):
+        '''
+        Initializes a plot object, defaults to a 3D plot
+        '''
         # Definition to initiate plot.
         self.plt = matplotlib.pyplot
         # New figure created.
@@ -144,6 +155,10 @@ class raytracing():
         return True
 
     def SetPlotFontSize(self,family='normal',weight='normal',size='22'):
+        '''
+        Todo: Fix this 
+        '''
+        
         # Definition to set the font type, size and weight in plots.
         font = {'family' : family,
                 'weight' : weight,
@@ -229,7 +244,7 @@ class raytracing():
 
         return sqrt(sum((array(Point1)-array(Point2))**2))
 
-    def createvector(self,(x0,y0,z0),(alpha,beta,gamma)):
+    def create_vec_euler(self,(x0,y0,z0),(alpha,beta,gamma)):
         # Create a vector which consists of a point and direction, not length
 
         point = array([[x0],[y0],[z0]])
@@ -270,7 +285,7 @@ class raytracing():
 
         return Point,distances
 
-    def createvectorfromtwopoints(self,(x0,y0,z0),(x1,y1,z1)):
+    def create_vec(self,(x0,y0,z0),(x1,y1,z1)):
         # Create a vector from two given points.
         point = array([[x0],[y0],[z0]])
         # Distance between two points.
@@ -443,7 +458,7 @@ class raytracing():
         gamma = degrees(arctan(gradz))+90
 
         # Return a normal vector.
-        return self.createvector((x0,y0,z0),(alpha,beta,gamma))
+        return self.create_vec_euler((x0,y0,z0),(alpha,beta,gamma))
 
     def FuncNormQuad(self,x0,y0,z0,quad):
         # Definition to return normal of a quadratic surface.
@@ -457,7 +472,7 @@ class raytracing():
         gamma = degrees(arctan(gradz))+90
 
         # Return a normal vector.
-        return self.createvector((x0,y0,z0),(alpha,beta,gamma))
+        return self.create_vec_euler((x0,y0,z0),(alpha,beta,gamma))
 
     def FindInterQuad(self,vector,quad,error=0.00000001,
                       numiter=1000,iternotify='no'):
@@ -517,9 +532,9 @@ class raytracing():
     def findintersurface(self,vector,(point0,point1,point2)):
         # Method to find intersection point inbetween a surface and a vector
         # See http://geomalgorithms.com/a06-_intersect-2.html
-        vector0,s     = self.createvectorfromtwopoints(point0,point1)
-        vector1,s     = self.createvectorfromtwopoints(point1,point2)
-        vector2,s     = self.createvectorfromtwopoints(point0,point2)
+        vector0,s     = self.create_vec(point0,point1)
+        vector1,s     = self.create_vec(point1,point2)
+        vector2,s     = self.create_vec(point0,point2)
         normvec       = self.multiplytwovectors(vector0,vector2)
         f             = point0-vector[0].T
         n             = normvec[1].copy()
@@ -570,9 +585,22 @@ class raytracing():
 
         return True
 
-    def plotsphericallens(self,cx=0,cy=0,cz=0,r=10,c='none',alpha=0.3,
+    def plotsphericallens(self,cx=0.,cy=0.,cz=0.,r=10,c='none',alpha=0.3,
                           PlotFlag=True,plot2d=False,sampleno=100):
+        '''
+        Arguments
+        ---------
+        cx : Translation of lens in x-direction. Default = 0.
+        cy : Translation of lens in y-direction. Default = 0.
+        cz : Translation of lens in z-direction. Default = 0.
 
+        Returns
+        ---------
+        sp_array : Numpy array describing spherical lens geometry
+
+
+        '''  
+    
         # Method to plot a spherical lens.
         v        = linspace(0, pi, sampleno)
         u        = linspace(0,2*pi,sampleno)
@@ -580,6 +608,7 @@ class raytracing():
         y        = r * outer(sin(u), sin(v)) + cy
         z        = r * outer(ones(size(u)), cos(v)) + cz
 
+        # Plots surface if flag is raised
         if PlotFlag == True:
 
             if plot2d:
@@ -591,7 +620,9 @@ class raytracing():
                     x, y, z, rstride=8, cstride=8, alpha=alpha,
                     color=c, antialiased=True)
 
-        return array([cx,cy,cz,r])
+        sp_array = array([cx,cy,cz,r])
+        
+        return sp_array
 
     def plotbox(self,cx=0,cy=0,cz=0,w=10,c='none',alpha=0.3):
 

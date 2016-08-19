@@ -82,6 +82,21 @@ def example_of_ray_tracing(n_air=1.0, n_sphere=1.5):
     
     return True
 
+def example_simple_lens(n_air=1.0, n_lens=1.5):
+
+    plot2d = False
+    ray = odak.raytracing()    
+    ray.PlotInit(plot2d=plot2d)
+
+    lens = ray.plot_convex_lens()
+    
+    # Plot the lens system
+    # Generate the mathematical description for the lens shape
+    # Generate rays
+    # For each ray, calculate intersect/distance to lens
+    # Apply Snell's law on the rays moving through the lens
+    
+
 def example_pw_ray_tracing(n_air=1.0, n_sphere=1.2):
 
     n = 1
@@ -98,7 +113,7 @@ def example_pw_ray_tracing(n_air=1.0, n_sphere=1.2):
     #for angle in np.linspace(100,105,30):
     for y_loc in np.linspace(-4,4,30):
         
-        vector            = ray.createvector((0,y_loc,0), (0,90,90))
+        vector            = ray.create_vec_euler((0,y_loc,0), (0,90,90))
         distance,normvec  = ray.findinterspher(vector,spherical)      
 
         #ray.plotvector(vector,50,plot2d=plot2d)
@@ -158,7 +173,7 @@ def example_of_ray_tracing_2():
     point1            = (0,1,0)
     point2            = (-1,0,1)
     ray.plottriangle(point0,point1,point2)
-    vector            = ray.createvector((0,0.5,5),(90,90,0))
+    vector            = ray.create_vec_euler((0,0.5,5),(90,90,0))
     distance,normvec  = ray.findintersurface(vector,(point0,point1,point2))
     if ray.isitontriangle(normvec[0],point0,point1,point2) == True:
         ray.plotvector(normvec,distance,'r')
@@ -178,9 +193,9 @@ def example_of_ray_tracing_3():
     pitch       = 10.
     cornercube0 = ray.plotcornercube(0,0,0,pitch,revert=False)
     cornercube1 = ray.plotcornercube(pitch/math.sqrt(3),-pitch/3,0,pitch,revert=True)
-    vector0     = ray.createvector((1.,2.1,10.),(90,90,0))
-    vector1     = ray.createvector((1.,1.,10.),(90,90,0))
-    vector2     = ray.createvector((4.,-4.,10.),(90,90,0))
+    vector0     = ray.create_vec_euler((1.,2.1,10.),(90,90,0))
+    vector1     = ray.create_vec_euler((1.,1.,10.),(90,90,0))
+    vector2     = ray.create_vec_euler((4.,-4.,10.),(90,90,0))
     vectorlist  = [vector0,vector1,vector2]
     cornercubes = [cornercube0,cornercube1]
     for vectors in vectorlist:
