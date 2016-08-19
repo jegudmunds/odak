@@ -19,108 +19,8 @@ from math import radians,tan,pi
 
 __author__  = ('Kaan Akşit')
 
-class ParaxialMatrix():
-
-    def __init__(self):
-        # See "Laser beams and resonators" from Kogelnik and Li for
-        # the theoratical explanation
-
-        self.plt = matplotlib.pyplot
-        self.fig = self.plt.figure()
-        self.ax  = self.fig.add_subplot(111,aspect='equal')
-        # Show grid.
-        self.plt.grid()
-
-        return
-
-    def CreateVector(self,x,angle):
-        # Creates a paraxial ray, angle is in degrees, x is
-        # the distance of the point to the plane of direction of propagation
-        angle  = radians(angle)
-        vector = array([[x],[tan(angle)],[1]])
-
-        return vector
-
-    def FreeSpace(self,vector,distance,deltax=0,deltafi=0):
-        # Ray transfer matrix of free space propagation, distance is in milimeters.
-        # deltax is the spatial shift, deltafi is the angular shift.
-        space  = array([[1,distance,deltax],[0,1,deltafi],[0,0,1]])
-        vector = dot(space,vector)
-
-        return vector
-
-    def CurvedInterface(self,vector,n1,n2,R,deltax=0,deltafi=0):
-        # Ray transfer matrix of a curved interface,
-        # focal length is f and is in in milimeters.
-        # Taken from Wikipedia article: Ray transfer matrix anaylsis.
-        # deltax is the spatial shift, deltafi is the angular shift.
-        # n1 is the first medium that the ray is coming from.
-        # n2 is the second medium that the ray is entering to.
-        # R is the radius of curvature, R>0 for convex
-        CInter = array([[1,0,deltax],[(n1-n2)/R/n2,n1/n2,deltafi],[0,0,1]])
-        vector = dot(CInter,vector)
-        return vector
-
-    def PlotVector(self,startvector,stopvector,posx=0,distance=0,color='g+-'):
-        if stopvector[1] !=0:
-            # Method to plot paraxial vectors in 2D space.
-            self.plt.plot([posx,(stopvector[0]-startvector[0])\
-                           /stopvector[1]+posx],[startvector[0],stopvector[0]],color)
-            # Return new position at X-axis.
-            posx += (stopvector[0]-startvector[0])/stopvector[1]
-        else:
-            self.plt.plot([posx,posx+distance],[startvector[0],stopvector[0]],color)
-            posx = distance
-        return posx
-    def PlotLine(self,point1,point2,color='ro--'):
-        # Definition to plot a line in between two points.
-        self.plt.plot(point1,point2,color)
-
-        return True
-
-    def PlotLens(self,CenterXY, thickness, LensHeight, rotation, alpha=0.5):
-        # Definition to plot a lens.
-        lens = Ellipse(xy=CenterXY, width=thickness,
-                       height=LensHeight, angle=-rotation)
-        
-        self.ax.add_artist(lens)
-        lens.set_clip_box(self.ax.bbox)
-        lens.set_alpha(alpha)
-        
-        return True
-    
-    def InitNewPlot(self):
-        # New plot initiated.
-        NewFig  = self.plt.figure()
-        NewPlot = NewFig.add_subplot(111)
-        return NewPlot,NewFig
-
-    def PlotHist(self,dataset,plot):
-        # Definition to plot a histogram.
-        plot.hist(dataset,bins=1000,color='blue',normed='True')
-
-        return True
-
-    def PlotData(self,dataset,color,alpha=1,linestyle='-'):
-        # Definition to plot a dataset.
-        self.plt.plot(dataset[0],dataset[1],linestyle=linestyle,
-                      color=color,alpha=alpha)
-        return True
-    
-    def PlotFillData(self,dataset,color):
-        # Definition to plot a dataset with fill.
-        self.plt.fill(dataset[0],dataset[1],color,alpha=0.3)
-        
-        return True
-    
-    def ShowPlot(self):
-        # Definition to plot the result.
-        self.plt.show()
-        
-        return True
-
-####################################################################
 class raytracing():
+    
     '''
     Class for performing simple ray tracing calculuations and visualizations
 
@@ -189,7 +89,7 @@ class raytracing():
         # Vector to hold angles is created.
         angles   = []
         # Find the distance in between points.
-        distance = self.finddistancebetweentwopoints(Point1,Point2)
+        distance = self.dist(Point1,Point2)
         # X axis rotation is calculated.
         angles.append(degrees(arccos( (Point2[0]-Point1[0])/distance )))
         # Y axis rotation is calculated.
@@ -238,7 +138,7 @@ class raytracing():
 
         return points
 
-    def finddistancebetweentwopoints(self,Point1,Point2):
+    def dist(self,Point1,Point2):
         # Function to find the distance between two points if there
         # was a line intersecting at both of them.
 
@@ -256,17 +156,18 @@ class raytracing():
 
         return array([point.reshape(3,1),cosin.reshape(3,1)])
 
-    def CalculateIntersectionOfTwoVectors(self,vector1,vector2):
+    def CalculateIntersectionOfTwoVectors(self,vec1,vec2):
         # Method to calculate the intersection of two vectors.
         A = array([
-                   [vector1[1][0][0], vector2[1][0][0] ],
-                   [vector1[1][1][0], vector2[1][1][0] ],
-                   [vector1[1][2][0], vector2[1][2][0] ]
+                   [vec1[1][0][0], vec2[1][0][0] ],
+                   [vec1[1][1][0], vec2[1][1][0] ],
+                   [vec1[1][2][0], vec2[1][2][0] ]
                   ])
+        
         B = array(
-                  [vector1[0][0]-vector2[0][0],
-                   vector1[0][1]-vector2[0][1],
-                   vector1[0][2]-vector2[0][2]
+                  [vec1[0][0]-vec2[0][0],
+                   vec1[0][1]-vec2[0][1],
+                   vec1[0][2]-vec2[0][2]
                   ])
 
         # LU decomposition solution.
@@ -279,9 +180,9 @@ class raytracing():
            distances[1] = 0
 
         # Point vector created.
-        Point = array([vector1[0][0][0]-distances[0]*vector1[1][0][0],
-                       vector1[0][1][0]-distances[0]*vector1[1][1][0],
-                       vector1[0][2][0]-distances[0]*vector1[1][2][0]
+        Point = array([vec1[0][0][0]-distances[0]*vec1[1][0][0],
+                       vec1[0][1][0]-distances[0]*vec1[1][1][0],
+                       vec1[0][2][0]-distances[0]*vec1[1][2][0]
                       ])
 
         return Point,distances
@@ -319,22 +220,22 @@ class raytracing():
         
         return vec_array, pdist
 
-    def cross_vectors(self,vector1,vector2):
+    def cross_vectors(self,vec1,vec2):
         # Multiply two vectors and return the resultant vector.
         # Used method described under:
         # Cross-product: http://en.wikipedia.org/wiki/Cross_product
-        angle = cross(vector1[1].transpose()[0],vector2[1].transpose()[0])
+        angle = cross(vec1[1].transpose()[0],vec2[1].transpose()[0])
 
-        return array([vector1[0],[[angle[0]],[angle[1]],[angle[2]]]])
+        return array([vec1[0],[[angle[0]],[angle[1]],[angle[2]]]])
 
-    def angle_btw_vectors(self,vector0,vector1):
+    def angle_btw_vectors(self,vec0,vec1):
         # Finds angle between two vectors
         # Used method described under:
         # http://www.wikihow.com/Find-the-Angle-Between-Two-Vectors
-        angle = vector0[1]*vector1[1]
+        angle = vec0[1]*vec1[1]
         angle = angle[0]+angle[1]+angle[2]
-        s1    = sqrt(vector0[1][0]**2+vector0[1][1]**2+vector0[1][2]**2)
-        s2    = sqrt(vector1[1][0]**2+vector1[1][1]**2+vector1[1][2]**2)
+        s1    = sqrt(vec0[1][0]**2+vec0[1][1]**2+vec0[1][2]**2)
+        s2    = sqrt(vec1[1][0]**2+vec1[1][1]**2+vec1[1][2]**2)
         angle = degrees(arccos(angle/(s1*s2)))
 
         return angle
@@ -381,8 +282,13 @@ class raytracing():
         return output
 
     def reflect(self,vec,nvec):
-        # Used method described in G.H. Spencer and M.V.R.K. Murty,
-        # "General Ray-Tracing Procedure", 1961
+        '''
+        Reflect a vector on surface defined by some normal vector
+
+        Used method described in G.H. Spencer and M.V.R.K. Murty,
+        General Ray-Tracing Procedure", 1961
+        '''
+        
         mu = 1
         div = pow(nvec[1,0],2)  + pow(nvec[1,1],2) + \
                       pow(nvec[1,2],2)
@@ -400,21 +306,32 @@ class raytracing():
 
         return outvec
 
-    def FindReflectNormal(self,vector0,vector1):
-        # Definition to find reflection normal in between two given vectors.
+    def FindReflectNormal(self,vec0,vec1):
+        '''
+        Definition to find reflection normal in between two given vectors.
+        '''
+        
         mu = 1
-        nvec = vector1.copy()
+        nvec = vec1.copy()
         for k in xrange(1,3):
-            a0 = arccos(vector0[1,k])
-            a1 = arccos(vector1[1,k])
+            a0 = arccos(vec0[1,k])
+            a1 = arccos(vec1[1,k])
             nvec[1,k] = cos(a1+(pi-(a0+a1))/2.)
 
         return nvec
 
     def snell(self,vec,nvec,n1,n2,error=0.01):
-        # Method for Snell's law
-        # n1 refractive index of the medium which vector is coming from
-        # n2 refractive index of the medium which vector tries to go into
+        '''
+        Method for Snell's law
+
+        Arguments
+        ---------
+
+        n1 (float) : refractive index of the medium 1
+        n2 (float) : refractive index of the medium 2
+
+        '''
+        
         mu = n1/n2
         div = pow(nvec[1,0],2)  + pow(nvec[1,1],2) + \
                 pow(nvec[1,2],2)
@@ -436,7 +353,7 @@ class raytracing():
            eps    = abs(oldto-to)
            # Iteration notifier
            #print 'Iteration number: %s, Error: %s' % (num,error)
-           # Iteration limiter
+           # Iteration limit
            if num > 5000:
               return vec
 
@@ -475,12 +392,16 @@ class raytracing():
         # Return a normal vector.
         return self.create_vec_euler((x0,y0,z0),(alpha,beta,gamma))
 
-    def FuncNormQuad(self,x0,y0,z0,quad):
-        # Definition to return normal of a quadratic surface.
+    def norm_quad(self,x0,y0,z0,quad):
+        '''
+        Function to return normal of a quadratic surface.
+        '''
+
         # Derivatives.
         gradx = 2/quad[4]*(x0-quad[0])/quad[3]**2
         grady = 2/quad[5]*(y0-quad[1])/quad[3]**2
         gradz = 2/quad[6]*(z0-quad[2])/quad[3]**2
+
         # Perpendicular to tangent surface.
         alpha = degrees(arctan(gradx))+90
         beta = degrees(arctan(grady))+90
@@ -493,81 +414,92 @@ class raytracing():
                       numiter=1000,iternotify='no'):
 
         # Definition to return intersection of a ray with a quadratic surface.
-        return self.FindInterFunc(vector,quad,self.FuncQuad,
-                                  self.FuncNormQuad,error=error,
-                                  numiter=numiter,iternotify=iternotify)
+        return self.find_interc(vector,quad,self.FuncQuad,
+                                  self.norm_quad, error=error,
+                                  numiter=numiter, iternotify=iternotify)
 
     def find_sphere_inter(self,vector,sphere,error=0.00000001,numiter=1000,
                        iternotify='no'):
-        # Finds the intersection of a ray with a sphere.
-        return self.FindInterFunc(
+        '''
+        Finds the intersection of a ray with a sphere.
+        '''
+        
+        return self.find_interc(
             vector,sphere, self.sphere, self.norm_sphere,error=error,
-            numiter=numiter,iternotify=iternotify)
+            numiter=numiter,iternotify=iternotify)    
 
-    def FindInterFunc(self,vector,SurfParam,Func,FuncNorm,
+    def find_interc(self, vec, SurfParam, Func, FuncNorm,
                       error=0.00000001,numiter=1000,iternotify='no'):
+        '''
+        Method for finding intercept between a vector and a parametric surface
 
-        # Method for finding intersection in between a vector
-        # and a parametric surface
+        '''
 
         number   = 0
         distance = 1
         olddist  = 0
         shift    = 0
         epsilon  = error*2
-        k        = vector[0,0,0]
-        l        = vector[0,1,0]
-        m        = vector[0,2,0]
-        FXYZ     = Func(k,l,m,SurfParam)
+        k = vec[0,0,0]
+        l = vec[0,1,0]
+        m = vec[0,2,0]
+        FXYZ = Func(k,l,m,SurfParam)
+
         if abs(FXYZ) < 0.01:
             shift  = 1.5 * SurfParam[3]
-            k     += shift * vector[1,0]
-            l     += shift * vector[1,1]
-            m     += shift * vector[1,2]
+            k += shift * vec[1,0]
+            l += shift * vec[1,1]
+            m += shift * vec[1,2]
+
         while epsilon > error:
             number   += 1
             oldFXYZ   = FXYZ
-            x         = distance * vector[1,0] + k
-            y         = distance * vector[1,1] + l
-            z         = distance * vector[1,2] + m
-            FXYZ      = Func(x,y,z,SurfParam)
+            x = distance * vec[1,0] + k
+            y = distance * vec[1,1] + l
+            z = distance * vec[1,2] + m
+            FXYZ = Func(x,y,z,SurfParam)
+
             # Secant method is calculated, see wikipedia article
-            newdist   = distance - FXYZ*(distance-olddist)/(FXYZ-oldFXYZ)
-            epsilon   = abs(newdist-distance)
-            olddist   = distance
+            newdist = distance - FXYZ*(distance-olddist)/(FXYZ-oldFXYZ)
+            epsilon = abs(newdist-distance)
+            olddist = distance
             distance  = newdist
-            # Check if the number of iterations are too much
+
+            # Check if the number of iterations are too great
             if number > numiter:
-               return 0,0
+               return 0, 0
 
         normvec = FuncNorm(x,y,z,SurfParam)
 
-        return distance+shift,normvec
+        return distance+shift, normvec
 
-    def findintersurface(self,vector,(point0,point1,point2)):
+    def findintersurface(self,vec,(point0,point1,point2)):
+        '''
         # Method to find intersection point inbetween a surface and a vector
         # See http://geomalgorithms.com/a06-_intersect-2.html
-        vector0,s     = self.create_vec(point0,point1)
-        vector1,s     = self.create_vec(point1,point2)
-        vector2,s     = self.create_vec(point0,point2)
-        normvec       = self.cross_vectors(vector0,vector2)
-        f             = point0-vector[0].T
-        n             = normvec[1].copy()
-        distance      = dot(n.T,f.T)/dot(n.T,vector[1])
-        normvec[0][0] = vector[0][0]+distance*vector[1][0]
-        normvec[0][1] = vector[0][1]+distance*vector[1][1]
-        normvec[0][2] = vector[0][2]+distance*vector[1][2]
+        '''
+        
+        vec0,s     = self.create_vec(point0,point1)
+        vec1,s     = self.create_vec(point1,point2)
+        vec2,s     = self.create_vec(point0,point2)
+        nvec       = self.cross_vectors(vec0,vec2)
+        f             = point0-vec[0].T
+        n             = nvec[1].copy()
+        distance      = dot(n.T,f.T)/dot(n.T,vec[1])
+        nvec[0][0] = vec[0][0]+distance*vec[1][0]
+        nvec[0][1] = vec[0][1]+distance*vec[1][1]
+        nvec[0][2] = vec[0][2]+distance*vec[1][2]
 
-        return distance[0][0],normvec
+        return distance[0][0], nvec
 
-    def plot_vector(self,vector,distance,color='k',plot2d=False,lw=2):
+    def plot_vector(self,vec,distance,color='k',plot2d=False,lw=2):
         '''
         Method to plot rays
         '''
         
-        x = array([vector[0,0,0], distance * vector[1,0] + vector[0,0,0]])
-        y = array([vector[0,1,0], distance * vector[1,1] + vector[0,1,0]])
-        z = array([vector[0,2,0], distance * vector[1,2] + vector[0,2,0]])
+        x = array([vec[0,0,0], distance * vec[1,0] + vec[0,0,0]])
+        y = array([vec[0,1,0], distance * vec[1,1] + vec[0,1,0]])
+        z = array([vec[0,2,0], distance * vec[1,2] + vec[0,2,0]])
         
         if plot2d:
             self.ax.plot(x,y,color=color,lw=lw)
@@ -576,7 +508,7 @@ class raytracing():
 
         return True
 
-    def PlotPoint(self,point,color='g*',contour=False,marker=False):
+    def plot_point(self,point,color='g*',contour=False,marker=False):
         # Method to plot a single spot.
         self.ax.plot(array([point[0]]),array([point[1]]),array([point[2]]),color)
         # Plotting contour on 3-axes.
@@ -602,8 +534,9 @@ class raytracing():
 
         return True
 
-    def plotsphericallens(self,cx=0.,cy=0.,cz=0.,r=10,c='none',alpha=0.3,
+    def plot_spherical_lens(self,cx=0.,cy=0.,cz=0.,r=10,c='none',alpha=0.3,
                           PlotFlag=True,plot2d=False,sampleno=100):
+
         '''
         Arguments
         ---------
@@ -641,7 +574,7 @@ class raytracing():
         
         return sp_array
 
-    def plotbox(self,cx=0,cy=0,cz=0,w=10,c='none',alpha=0.3):
+    def plot_box(self,cx=0,cy=0,cz=0,w=10,c='none',alpha=0.3):
 
         points = array([[-w, -w, -w],
                         [w, -w, -w ],
@@ -860,6 +793,109 @@ class raytracing():
         # Method to close all figures.
         self.plt.close('all')
         return True
+
+    
+####################################################################
+class ParaxialMatrix():
+
+    def __init__(self):
+        # See "Laser beams and resonators" from Kogelnik and Li for
+        # the theoratical explanation
+
+        self.plt = matplotlib.pyplot
+        self.fig = self.plt.figure()
+        self.ax  = self.fig.add_subplot(111,aspect='equal')
+        # Show grid.
+        self.plt.grid()
+
+        return
+
+    def CreateVector(self,x,angle):
+        # Creates a paraxial ray, angle is in degrees, x is
+        # the distance of the point to the plane of direction of propagation
+        angle  = radians(angle)
+        vector = array([[x],[tan(angle)],[1]])
+
+        return vector
+
+    def FreeSpace(self,vector,distance,deltax=0,deltafi=0):
+        # Ray transfer matrix of free space propagation, distance is in milimeters.
+        # deltax is the spatial shift, deltafi is the angular shift.
+        space  = array([[1,distance,deltax],[0,1,deltafi],[0,0,1]])
+        vector = dot(space,vector)
+
+        return vector
+
+    def CurvedInterface(self,vector,n1,n2,R,deltax=0,deltafi=0):
+        # Ray transfer matrix of a curved interface,
+        # focal length is f and is in in milimeters.
+        # Taken from Wikipedia article: Ray transfer matrix anaylsis.
+        # deltax is the spatial shift, deltafi is the angular shift.
+        # n1 is the first medium that the ray is coming from.
+        # n2 is the second medium that the ray is entering to.
+        # R is the radius of curvature, R>0 for convex
+        CInter = array([[1,0,deltax],[(n1-n2)/R/n2,n1/n2,deltafi],[0,0,1]])
+        vector = dot(CInter,vector)
+        return vector
+
+    def PlotVector(self,startvector,stopvector,posx=0,distance=0,color='g+-'):
+        if stopvector[1] !=0:
+            # Method to plot paraxial vectors in 2D space.
+            self.plt.plot([posx,(stopvector[0]-startvector[0])\
+                           /stopvector[1]+posx],[startvector[0],stopvector[0]],color)
+            # Return new position at X-axis.
+            posx += (stopvector[0]-startvector[0])/stopvector[1]
+        else:
+            self.plt.plot([posx,posx+distance],[startvector[0],stopvector[0]],color)
+            posx = distance
+        return posx
+    def PlotLine(self,point1,point2,color='ro--'):
+        # Definition to plot a line in between two points.
+        self.plt.plot(point1,point2,color)
+
+        return True
+
+    def PlotLens(self,CenterXY, thickness, LensHeight, rotation, alpha=0.5):
+        # Definition to plot a lens.
+        lens = Ellipse(xy=CenterXY, width=thickness,
+                       height=LensHeight, angle=-rotation)
+        
+        self.ax.add_artist(lens)
+        lens.set_clip_box(self.ax.bbox)
+        lens.set_alpha(alpha)
+        
+        return True
+    
+    def InitNewPlot(self):
+        # New plot initiated.
+        NewFig  = self.plt.figure()
+        NewPlot = NewFig.add_subplot(111)
+        return NewPlot,NewFig
+
+    def PlotHist(self,dataset,plot):
+        # Definition to plot a histogram.
+        plot.hist(dataset,bins=1000,color='blue',normed='True')
+
+        return True
+
+    def PlotData(self,dataset,color,alpha=1,linestyle='-'):
+        # Definition to plot a dataset.
+        self.plt.plot(dataset[0],dataset[1],linestyle=linestyle,
+                      color=color,alpha=alpha)
+        return True
+    
+    def PlotFillData(self,dataset,color):
+        # Definition to plot a dataset with fill.
+        self.plt.fill(dataset[0],dataset[1],color,alpha=0.3)
+        
+        return True
+    
+    def ShowPlot(self):
+        # Definition to plot the result.
+        self.plt.show()
+        
+        return True
+
 
 
 ####################################################################

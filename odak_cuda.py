@@ -31,7 +31,7 @@ class raytracing():
         cuda.memcpy_dtoh(a_res,a_gpu)
         return a_res
     # Definition to apply a function to a numpy array on GPU's memory.
-    def finddistancebetweentwopoints(self,p1_gpu,p2_gpu,blockno=(3,1,1)):
+    def dist(self,p1_gpu,p2_gpu,blockno=(3,1,1)):
         dist     =  (gpuarray.sum(((p1_gpu-p2_gpu)**2))**0.5).get()
         return dist
     # Definition to find angle between two points if there was a line intersecting at both of them.
@@ -60,7 +60,7 @@ def main():
     p1_gpu   = ray.TranToGPU(p1)
     p2_gpu   = ray.TranToGPU(p2)
     # Calculate the distance between them on GPU.
-    dist_gpu = ray.finddistancebetweentwopoints(p1_gpu,p2_gpu)
+    dist_gpu = ray.dist(p1_gpu,p2_gpu)
     print dist_gpu
     # Move it back to the memory from GPU.
     print 'Odak by %s' % __author__

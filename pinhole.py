@@ -199,11 +199,11 @@ def Solve(ds,dhp,r,dpp,dea,dwe,tel,nel,nie,nair,dpl,xel,yel,DetPos,ShowPlot=Fals
     # Create the whole eye ball.
     EyeBall  = (xel,yel,zel-dwe,dwe)
     # Plot the eye ball.
-    SphericalLens = ray.plotsphericallens(EyeBall[0],EyeBall[1],EyeBall[2],EyeBall[3],'y',0.1)
+    SphericalLens = ray.plot_spherical_lens(EyeBall[0],EyeBall[1],EyeBall[2],EyeBall[3],'y',0.1)
     # Create a dummy spherical lens to find the intersection point of the incoming ray with aspherical lens.
     DummySL1 = (xel,yel,zel-dea,dea)
     # Plot a spherical lens.
-    SphericalLens = ray.plotsphericallens(DummySL1[0],DummySL1[1],DummySL1[2],DummySL1[3],'g',0.1)
+    SphericalLens = ray.plot_spherical_lens(DummySL1[0],DummySL1[1],DummySL1[2],DummySL1[3],'g',0.1)
     # Calculate and print power of the spherical lens.
     D = (nel-nair)*(pow(dea,-1)-pow(-dea,-1)+(nel-nair)*2*dea/nel/(-pow(dea,2)))
 #    print 'Power of the spherical lens: ', 1000.*D
@@ -271,7 +271,7 @@ def Solve(ds,dhp,r,dpp,dea,dwe,tel,nel,nie,nair,dpl,xel,yel,DetPos,ShowPlot=Fals
             # Check if the calculated distance value has a logical value.
             CheckValue = "%.2f" % abs(distances[0])
             if CheckValue != '0.00' and float(CheckValue) < 100000:
-                ray.PlotPoint(intersection,'go',False,True)
+                ray.plot_point(intersection,'go',False,True)
                 # Storing intersection point in a list.
                 InterPoints.append(intersection)
     # Transpose of the InterPoints 2D list.

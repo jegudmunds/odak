@@ -32,8 +32,8 @@ def example_of_ray_tracing(n_air=1.0, n_sphere=1.5):
 
     #    rotvec = ray.transform(vector,(45,0,0),(0.5,1,0))
     #    print 'Output vector: \n %s' % rotvec
-    spherical = ray.plotsphericallens(20,0,0,3,plot2d=plot2d)
-    spherical2 = ray.plotsphericallens(27,0,0,4,plot2d=plot2d)
+    spherical = ray.plot_spherical_lens(20,0,0,3,plot2d=plot2d)
+    spherical2 = ray.plot_spherical_lens(27,0,0,4,plot2d=plot2d)
     
     #for angle in xrange(100,110,1):
     for angle in np.linspace(100,105,30):
@@ -107,8 +107,8 @@ def example_pw_ray_tracing(n_air=1.0, n_sphere=1.2):
 
     #    rotvec = ray.transform(vector,(45,0,0),(0.5,1,0))
     #    print 'Output vector: \n %s' % rotvec
-    spherical = ray.plotsphericallens(20,0,0,3,plot2d=plot2d)
-    spherical2 = ray.plotsphericallens(27,0,0,4,plot2d=plot2d)
+    spherical = ray.plot_spherical_lens(20,0,0,3,plot2d=plot2d)
+    spherical2 = ray.plot_spherical_lens(27,0,0,4,plot2d=plot2d)
     
     #for angle in np.linspace(100,105,30):
     for y_loc in np.linspace(-4,4,30):
